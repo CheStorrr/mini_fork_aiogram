@@ -5,7 +5,7 @@ from .base_context import BaseContext
 class Text(BaseFilter):
     def __init__(
         self, 
-        text: Optional[str], 
+        text: Optional[str] = None, 
         list_: Optional[list[str]] = None,
         in_: Optional[bool] = False,
         lower: bool = True,
@@ -22,17 +22,13 @@ class Text(BaseFilter):
         self,
         ctx: BaseContext
     ) -> bool:
-        print('called filter')
         if not ctx.message: 
-            print('not message')
             return False
         
         if not ctx.message.text:
-            print('not message text')
             return False 
         
         text = ctx.message.text
-        print('message text:', text)
 
         if self.lower:
             text = text.lower()
