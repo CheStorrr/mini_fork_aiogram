@@ -13,8 +13,8 @@ git clone https://github.com/CheStorrr/mini_fork_aiogram
 Пример использования: 
 
 ```py
-from fork import BaseContext, Dispatcher, Router 
-from aiogram import Bot, F
+from mini_fork_aiogram import BaseContext, Dispatcher, F
+from aiogram import Bot
 import asyncio
 
 
@@ -25,7 +25,7 @@ class MyContext(BaseContext):
 bot = Bot(token="YOUR_TOKEN")
 dp = Dispatcher(context_=MyContext)
 
-@dp.message(F.text)
+@dp.message(F.text())
 async def echo(ctx: MyContext):
     print(ctx.attr1) # out: string
     await ctx.reply(ctx.message.text)
@@ -41,7 +41,7 @@ asyncio.run(main())
 Использование в middleware: 
 
 ```py
-from fork import BaseContext, Dispatcher
+from mini_fork_aiogram import BaseContext, Dispatcher
 from aiogram import BaseMiddleware
 
 class Service: # Ваш сервис или, возможно, сессия к базе данных
@@ -62,9 +62,30 @@ class Middleware(BaseMiddleware):
         event: MyContext,
         data
     ):
-        print(ctx.attr1) # out: string
-        ctx.service = Service() # Инициализируем ваш сервис
+        print(event.attr1) # out: string
+        event.service = Service() # Инициализируем ваш сервис
         await handler(event, data)
 
 
+```
+
+Использование в фильтрах: 
+```py
+from aiogram.filters import BaseFilter 
+
+class MyContext(BaseContext):
+    role = 1
+
+
+class YourFilter(BaseFilter):
+
+    async def __call__(
+        self,
+        ctx: BaseContext
+    ) -> bool:
+        return ctx.role == 1
+
+# использование:
+@dp.message(YourFilter())
+async def ...
 ```
