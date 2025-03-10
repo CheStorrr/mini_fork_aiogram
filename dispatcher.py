@@ -24,6 +24,7 @@ class MiddlewareManagaer(MiddlewareManager):
                 data=kwargs,
                 event_name=event_name
             )
+            base_context.set_bot(kwargs['bot'])
             return handler(base_context, **kwargs)
 
         middleware = handler_wrapper
