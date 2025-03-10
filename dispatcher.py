@@ -8,7 +8,7 @@ import functools
 
 class MiddlewareManagaer(MiddlewareManager):
 
-    def __init__(self, event_type: str, context: Type[BaseContext]):
+    def __init__(self, event_type: str):
         super().__init__()
         self.event_type = event_type
 
