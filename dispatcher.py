@@ -19,6 +19,7 @@ class MiddlewareManagaer(MiddlewareManager):
         
         @functools.wraps(handler)
         def handler_wrapper(event, kwargs):
+            print('wrap', event)
             base_context: Type[BaseContext] = context(
                 event=event,
                 data=kwargs,
@@ -41,6 +42,7 @@ class TelegramEventObserverr(TelegramEventObserver):
         
 
     async def trigger(self, event, **kwargs):
+        print('trigger event', event)
         for handler in self.handlers:
             kwargs["handler"] = handler
             result, data = await handler.check(event, **kwargs)
@@ -57,7 +59,7 @@ class TelegramEventObserverr(TelegramEventObserver):
                         event_name=self.event_name,
                     )
                     base_context.set_bot(kwargs['bot'])
-                    return await wrapped_inner(base_context, kwargs)
+                    return await wrapped_inner(event, kwargs)
                 except Exception as e:
                     print(str(e))
                     continue
