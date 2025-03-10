@@ -74,13 +74,13 @@ class TelegramEventObserverr(TelegramEventObserver):
         return wrapped_outer(event, data)
 
 
-class Router2(Router):
+class Router(Router):
     def __init__(self, *, name = None):
         super().__init__(name=name)
         self.message = self.observers['message'] = TelegramEventObserverr(router=self, event_name='message')
 
 
-class Dispatcher2(Dispatcher):
+class Dispatcher(Dispatcher):
 
     def __init__(self, *, storage = None, fsm_strategy = FSMStrategy.USER_IN_CHAT, events_isolation = None, disable_fsm = False, name = None, context_: Type[BaseContext] = BaseContext, **kwargs):
         super().__init__(storage=storage, fsm_strategy=fsm_strategy, events_isolation=events_isolation, disable_fsm=disable_fsm, name=name, **kwargs)
