@@ -8,18 +8,18 @@ import functools
 
 class MiddlewareManagaer(MiddlewareManager):
 
-    def __init__(self, event_type: str):
+    def __init__(self, event_type: str, context: Type[BaseContext]):
         super().__init__()
         self.event_type = event_type
 
     @staticmethod
     def wrap_middlewares(
-        middlewares, handler, event_name: str
+        middlewares, handler, event_name: str, context: type[BaseContext]
     ):
         
         @functools.wraps(handler)
         def handler_wrapper(event, kwargs):
-            base_context: Type[BaseContext] = BaseContext(
+            base_context: Type[BaseContext] = context(
                 event=event,
                 data=kwargs,
                 event_name=event_name
@@ -54,7 +54,7 @@ class TelegramEventObserverr(TelegramEventObserver):
                     base_context: Type[BaseContext] = self.context(
                         event=event,
                         data=kwargs,
-                        event_name=self.event_name
+                        event_name=self.event_name,\
                     )
                     base_context.set_bot(kwargs['bot'])
                     return await wrapped_inner(base_context, kwargs)
@@ -70,7 +70,8 @@ class TelegramEventObserverr(TelegramEventObserver):
         wrapped_outer = self.middleware.wrap_middlewares(
             self.outer_middleware,
             callback,
-            self.event_name
+            self.event_name,
+            self.context
         )
         return wrapped_outer(event, data)
 
