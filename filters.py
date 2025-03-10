@@ -29,7 +29,6 @@ class Text(BaseFilter):
             return False 
         
         text = ctx.message.text
-        print('text', text)
 
         if self.lower:
             text = text.lower()
