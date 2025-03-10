@@ -54,7 +54,7 @@ class TelegramEventObserverr(TelegramEventObserver):
                     base_context: Type[BaseContext] = self.context(
                         event=event,
                         data=kwargs,
-                        event_name=self.event_name,\
+                        event_name=self.event_name,
                     )
                     base_context.set_bot(kwargs['bot'])
                     return await wrapped_inner(base_context, kwargs)
