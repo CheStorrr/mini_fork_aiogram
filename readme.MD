@@ -13,7 +13,7 @@ git clone https://github.com/CheStorrr/mini_fork_aiogram
 Пример использования: 
 
 ```py
-from mini_fork_aiogram import BaseContext, Dispatcher, F
+from mini_fork_aiogram import BaseContext, Dispatcher, Router, F
 from aiogram import Bot
 import asyncio
 
@@ -24,6 +24,12 @@ class MyContext(BaseContext):
 
 bot = Bot(token="YOUR_TOKEN")
 dp = Dispatcher(context_=MyContext)
+router = Router(context_=MyContext)
+
+@router.message(F.text('/start'))
+async def start_command(ctx: MyContext):
+    await ctx.answer('Hello!')
+
 
 @dp.message(F.text())
 async def echo(ctx: MyContext):
@@ -32,6 +38,7 @@ async def echo(ctx: MyContext):
 
 
 async def main():
+    dp.include_router(router)
     await dp.start_polling(bot)
 
 asyncio.run(main())
