@@ -2,9 +2,11 @@ from aiogram import Dispatcher, Router
 from aiogram.dispatcher.event.telegram import TelegramEventObserver
 from aiogram.dispatcher.middlewares.manager import MiddlewareManager
 from aiogram.fsm.strategy import FSMStrategy
+from aiogram.dispatcher.event.bases import UNHANDLED
 from .base_context import BaseContext 
 from typing import Type
 import functools
+
 
 class MiddlewareManagaer(MiddlewareManager):
 
@@ -19,12 +21,20 @@ class MiddlewareManagaer(MiddlewareManager):
         
         @functools.wraps(handler)
         def handler_wrapper(event, kwargs):
-            base_context: Type[BaseContext] = context(
-                event=event,
-                data=kwargs,
-                event_name=event_name
-            )
-            base_context.set_bot(kwargs['bot'])
+            base_context = None 
+
+            try:
+                event.text
+
+                base_context: Type[BaseContext] = context(
+                    event=event,
+                    data=kwargs,
+                    event_name=event_name
+                )
+                base_context.set_bot(kwargs['bot'])
+            except:
+                base_context = event 
+
             return handler(base_context, **kwargs)
 
         middleware = handler_wrapper
@@ -51,18 +61,12 @@ class TelegramEventObserverr(TelegramEventObserver):
                         self._resolve_middlewares(),
                         handler.call,
                     )
-                    base_context: Type[BaseContext] = self.context(
-                        event=event,
-                        data=kwargs,
-                        event_name=self.event_name,
-                    )
-                    base_context.set_bot(kwargs['bot'])
                     return await wrapped_inner(event, kwargs)
                 except Exception as e:
                     print(str(e))
                     continue
 
-        return False
+        return UNHANDLED
     
     def wrap_outer_middleware(
         self, callback, event, data
@@ -74,12 +78,20 @@ class TelegramEventObserverr(TelegramEventObserver):
             self.context
         )
         return wrapped_outer(event, data)
+    
+    def __call__(self, *filters, flags = None, **kwargs):
+        result = super().__call__(*filters, flags=flags, **kwargs)
+        return result
+    
+    def register(self, callback, *filters, flags = None, **kwargs):
+        callback = super().register(callback, *filters, flags=flags, **kwargs)
 
 
 class Router(Router):
-    def __init__(self, *, name = None):
+    def __init__(self, *, context_: Type[BaseContext] = None, name = None, ):
         super().__init__(name=name)
-        self.message = self.observers['message'] = TelegramEventObserverr(router=self, event_name='message')
+        self.message = self.observers['message'] = TelegramEventObserverr(router=self, event_name='message', context=context_)
+
 
 
 class Dispatcher(Dispatcher):
@@ -87,3 +99,4 @@ class Dispatcher(Dispatcher):
     def __init__(self, *, storage = None, fsm_strategy = FSMStrategy.USER_IN_CHAT, events_isolation = None, disable_fsm = False, name = None, context_: Type[BaseContext] = BaseContext, **kwargs):
         super().__init__(storage=storage, fsm_strategy=fsm_strategy, events_isolation=events_isolation, disable_fsm=disable_fsm, name=name, **kwargs)
         self.message = self.observers['message'] = TelegramEventObserverr(router=self, event_name='message', context=context_)
+
