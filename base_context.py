@@ -19,7 +19,6 @@ class BaseContext:
         event_name: str='message',
         **kw
     ):
-        print(f"initialize context; event: {type(event)}; data: {type(data)}")
         self.event = event
         self.data = data 
         self.event_name = event_name
